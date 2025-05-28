@@ -1404,7 +1404,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: -7986199352878517068, guid: 666b945f173842f4385bac531be23198, type: 3}
       propertyPath: Name
-      value: Tea Room
+      value: TeaRoom
       objectReference: {fileID: 0}
     - target: {fileID: 1005365492291138170, guid: 666b945f173842f4385bac531be23198, type: 3}
       propertyPath: m_Name
@@ -3166,7 +3166,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: -7986199352878517068, guid: 666b945f173842f4385bac531be23198, type: 3}
       propertyPath: Name
-      value: Dinner Room
+      value: DinnerRoom
       objectReference: {fileID: 0}
     - target: {fileID: 1005365492291138170, guid: 666b945f173842f4385bac531be23198, type: 3}
       propertyPath: m_Name
