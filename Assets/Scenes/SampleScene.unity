@@ -1777,6 +1777,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: -5836318834316925990, guid: 09b3e646333444b4c9de488d4b58945d, type: 3}
+      propertyPath: m_StoppingDistance
+      value: 2
+      objectReference: {fileID: 0}
     - target: {fileID: 3311574513060899921, guid: 09b3e646333444b4c9de488d4b58945d, type: 3}
       propertyPath: m_Name
       value: NPC (3)
@@ -2553,6 +2557,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: -5836318834316925990, guid: 09b3e646333444b4c9de488d4b58945d, type: 3}
+      propertyPath: m_StoppingDistance
+      value: 2
+      objectReference: {fileID: 0}
     - target: {fileID: 3311574513060899921, guid: 09b3e646333444b4c9de488d4b58945d, type: 3}
       propertyPath: m_Name
       value: NPC (2)
@@ -2913,6 +2921,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: -5836318834316925990, guid: 09b3e646333444b4c9de488d4b58945d, type: 3}
+      propertyPath: m_StoppingDistance
+      value: 2
+      objectReference: {fileID: 0}
     - target: {fileID: 3311574513060899921, guid: 09b3e646333444b4c9de488d4b58945d, type: 3}
       propertyPath: m_Name
       value: NPC (1)
@@ -3104,6 +3116,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: -5836318834316925990, guid: 09b3e646333444b4c9de488d4b58945d, type: 3}
+      propertyPath: m_StoppingDistance
+      value: 2
+      objectReference: {fileID: 0}
     - target: {fileID: 3311574513060899921, guid: 09b3e646333444b4c9de488d4b58945d, type: 3}
       propertyPath: m_Name
       value: NPC

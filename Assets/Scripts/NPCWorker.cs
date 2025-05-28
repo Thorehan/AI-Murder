@@ -4,6 +4,9 @@ using System.Collections;
 using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine.Networking;
+using System.Text.Json;
+using Newtonsoft.Json.Linq;
+
 
 public class NPCWorker : MonoBehaviour
 {
@@ -25,9 +28,10 @@ public class NPCWorker : MonoBehaviour
     {
         foreach (Transform room in roomList)
         {
-            if (room != null && !TaskRooms.ContainsKey(room.name))
+            var ee = room.GetComponent<TaskPoint>().Name;
+            if (room != null && !TaskRooms.ContainsKey(ee))
             {
-                string temp = room.name.Replace(" ", "");
+                string temp = ee;
                 TaskRooms.Add(temp, room);
             }
         }
@@ -52,31 +56,32 @@ public class NPCWorker : MonoBehaviour
             return;
         }
         AddTaskRoomsFromList(taskPoints);
-        StartCoroutine(SendSignalToLocalhost("Game Start"));
+        StartCoroutine(SendSignalToLocalhost("Game Started, pick where will you go"));
     }
 
     void Update()
     {
-        if (isDoingTask || currentTarget == null)
-            return;
+        //if (isDoingTask || currentTarget == null)
+        //    return;
+//
+        //foreach (NPCWorker other in allNPCs)
+        //{
+        //    if (other == this) continue;
+        //    if (other.currentTarget == currentTarget)
+        //    {
+        //        float distance = Vector3.Distance(transform.position, other.transform.position);
+        //        if (distance < minDistanceToOther)
+        //        {
+        //            //StartCoroutine(SendSignalToLocalhost("TooCloseToOtherNPC"));
+        //            //PickNewTarget();
+        //            return;
+        //        }
+        //    }
+        //}
 
-        foreach (NPCWorker other in allNPCs)
+        if (!isDoingTask && !agent.pathPending && agent.remainingDistance <= agent.stoppingDistance)
         {
-            if (other == this) continue;
-            if (other.currentTarget == currentTarget)
-            {
-                float distance = Vector3.Distance(transform.position, other.transform.position);
-                if (distance < minDistanceToOther)
-                {
-                    //StartCoroutine(SendSignalToLocalhost("TooCloseToOtherNPC"));
-                    //PickNewTarget();
-                    return;
-                }
-            }
-        }
-
-        if (!agent.pathPending && agent.remainingDistance <= agent.stoppingDistance)
-        {
+            Debug.Log($"{npcName} gets task");
             StartCoroutine(DoTask());
         }
     }
@@ -94,9 +99,8 @@ public class NPCWorker : MonoBehaviour
     {
         isDoingTask = true;
         yield return new WaitForSeconds(taskDuration);
-        isDoingTask = false;
         //PickNewTarget();
-        SendSignalToLocalhost("TaskCompleted");
+        StartCoroutine(SendSignalToLocalhost("you have waited for " + taskDuration));
     }
 
 
@@ -123,36 +127,58 @@ public class NPCWorker : MonoBehaviour
             else
             {
                 Debug.Log($"{www.downloadHandler.text}");
-                if (www.downloadHandler.text.Contains("<DinnerRoom>"))
+                // Extract 'message' using JObject
+                string json = www.downloadHandler.text;
+                string message = null;
+                try
+                {
+                    var jobj = JObject.Parse(json);
+                    message = jobj["message"]?.ToString();
+                    if (!string.IsNullOrEmpty(message))
+                        Debug.Log($"Extracted message: {message}");
+                }
+                catch (System.Exception ex)
+                {
+                    Debug.LogWarning($"Failed to parse JSON: {ex.Message}");
+                }
+
+                if (message.Contains("<DinnerRoom>"))
                 {
                     Transform newTarget = TaskRooms["DinnerRoom"];
                     currentTarget = newTarget;
                     agent.SetDestination(currentTarget.position);
+                    isDoingTask = false;
                 }
-                else if (www.downloadHandler.text.Contains("<Kicten>"))
+                else if (message.Contains("<Kicten>"))
                 {
                     Transform newTarget = TaskRooms["Kicten"];
                     currentTarget = newTarget;
                     agent.SetDestination(currentTarget.position);
+                    isDoingTask = false;
                 }
-                else if (www.downloadHandler.text.Contains("<TeaRoom>"))
+                else if (message.Contains("<TeaRoom>"))
                 {
                     Transform newTarget = TaskRooms["TeaRoom"];
                     currentTarget = newTarget;
                     agent.SetDestination(currentTarget.position);
+                    isDoingTask = false;
                 }
-                else if (www.downloadHandler.text.Contains("<Garden>"))
+                else if (message.Contains("<Garden>"))
                 {
                     Transform newTarget = TaskRooms["Garden"];
                     currentTarget = newTarget;
                     agent.SetDestination(currentTarget.position);
+                    isDoingTask = false;
                 }
-                else if (www.downloadHandler.text.Contains("<Corridor>"))
+                else if (message.Contains("<Corridor>"))
                 {
                     Transform newTarget = TaskRooms["Corridor"];
                     currentTarget = newTarget;
                     agent.SetDestination(currentTarget.position);
+                    isDoingTask = false;
                 }
+
+                
             }
         }
     }
