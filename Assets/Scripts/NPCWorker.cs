@@ -1,16 +1,18 @@
+using Newtonsoft.Json.Linq;
 using UnityEngine;
 using UnityEngine.AI;
 using System.Collections;
 using System.Collections.Generic;
-using Unity.VisualScripting;
 using UnityEngine.Networking;
 using System.Text.Json;
-using Newtonsoft.Json.Linq;
+
 
 
 public class NPCWorker : MonoBehaviour
 {
     public string npcName = "Worker";
+    public CoolDown SpeakCD = new CoolDown(2f);
+    public Room currentRoom;
     public float taskDuration = 3f;
     public float minDistanceToOther = 2f;
 
@@ -21,7 +23,7 @@ public class NPCWorker : MonoBehaviour
     private NavMeshAgent agent;
     private bool isDoingTask = false;
 
-    Dictionary<NPCWorker, Cooldown> cooldowns = new Dictionary<NPCWorker, Cooldown>();
+
 
     Dictionary<string, Transform> TaskRooms = new Dictionary<string, Transform>();
     public void AddTaskRoomsFromList(List<Transform> roomList)
@@ -127,59 +129,80 @@ public class NPCWorker : MonoBehaviour
             else
             {
                 Debug.Log($"{www.downloadHandler.text}");
-                // Extract 'message' using JObject
-                string json = www.downloadHandler.text;
-                string message = null;
-                try
+                // Fallback: simple string extraction for 'action' if JObject fails
+                string json = www.downloadHandler.text.ToString();
+                Debug.Log($"Received JSON: {json}");
+                string action = null;
+                string cleaned = json.Trim('"');
+                string unescapedJson = System.Text.RegularExpressions.Regex.Unescape(cleaned);
+                // Try to parse with JObject first
+                var jobj = JObject.Parse(unescapedJson);
+                if (jobj != null && jobj["action"] != null)
                 {
-                    var jobj = JObject.Parse(json);
-                    message = jobj["message"]?.ToString();
-                    if (!string.IsNullOrEmpty(message))
-                        Debug.Log($"Extracted message: {message}");
-                }
-                catch (System.Exception ex)
-                {
-                    Debug.LogWarning($"Failed to parse JSON: {ex.Message}");
+                    action = jobj["action"].Value<string>();
+                    if (!string.IsNullOrEmpty(action))
+                        Debug.Log($"Extracted action: {action}");
                 }
 
-                if (message.Contains("<DinnerRoom>"))
+                //if (jobj["message"]?.Value<string>() != null)
+                //{
+                //    if (currentRoom != null)
+                //        currentRoom.BroadcastMessageToWorkers($"{npcName}: {jobj["message"].Value<string>()}");
+                //}
+                
+                if (action == null)
+                    {
+                        Debug.Log("message null");
+                        goto fk_it;
+                    }
+                if (action.Contains("<DinnerRoom>"))
                 {
                     Transform newTarget = TaskRooms["DinnerRoom"];
                     currentTarget = newTarget;
                     agent.SetDestination(currentTarget.position);
                     isDoingTask = false;
                 }
-                else if (message.Contains("<Kicten>"))
+                else if (action.Contains("<Kicten>"))
                 {
                     Transform newTarget = TaskRooms["Kicten"];
                     currentTarget = newTarget;
                     agent.SetDestination(currentTarget.position);
                     isDoingTask = false;
                 }
-                else if (message.Contains("<TeaRoom>"))
+                else if (action.Contains("<TeaRoom>"))
                 {
                     Transform newTarget = TaskRooms["TeaRoom"];
                     currentTarget = newTarget;
                     agent.SetDestination(currentTarget.position);
                     isDoingTask = false;
                 }
-                else if (message.Contains("<Garden>"))
+                else if (action.Contains("<Garden>"))
                 {
                     Transform newTarget = TaskRooms["Garden"];
                     currentTarget = newTarget;
                     agent.SetDestination(currentTarget.position);
                     isDoingTask = false;
                 }
-                else if (message.Contains("<Corridor>"))
+                else if (action.Contains("<Corridor>"))
                 {
                     Transform newTarget = TaskRooms["Corridor"];
                     currentTarget = newTarget;
                     agent.SetDestination(currentTarget.position);
                     isDoingTask = false;
                 }
-
+                fk_it:;
                 
             }
+        }
+    }
+
+
+    public IEnumerator Speak(string message)
+    {
+        yield return new WaitForSeconds(2f); // Simulate speaking delay
+        if ((bool)SpeakCD)
+        {
+
         }
     }
 
