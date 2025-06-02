@@ -15,12 +15,11 @@ class ThoughtResponse(BaseModel):
     action: str = Field(default=None, description="Action to be taken by the agent, if any. this will interact with code. you will write where you go here")
 
 class AIAgent:
-    def __init__(self, name: str, api_key: str, model: str, embedding_model: str):
+    def __init__(self, name: str, Client: object, model: str, embedding_model: str):
         self.name = name
-        self.api_key = api_key
         self.model = model
         self.embedding_model = embedding_model
-        self.client = OpenAI(api_key=api_key)
+        self.client = Client
         self.csv_path = pathlib.Path(f"{self.name}.csv")
         self.sysprompt_path = pathlib.Path(f"sysprompt.txt") if not pathlib.Path(f"{self.name}_sysprompt.txt").exists() else pathlib.Path(f"{self.name}_sysprompt.txt")
         with open(self.sysprompt_path, 'r', encoding='utf-8') as f:
@@ -228,6 +227,8 @@ class AIAgent:
 
     def SearchRecordFunction(self, args):
         temp = json.loads(args)
+        if "vector" in temp:
+            temp.pop("vector")
         return self.SearchRecord(temp["query"], temp["top_k"])
 
     def get_response(self, prompt: str):

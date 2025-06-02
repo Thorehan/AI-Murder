@@ -18,20 +18,48 @@ model = "gpt-4o-mini"
 embedding_model = "text-embedding-3-small"
 client = OpenAI(api_key=api_key)
 
-
 class ThoughtResponse(BaseModel):
     thinking: str
     message: str
 
+Storyteller = Agent.AIAgent(name="Storyteller", Client=client, model=model, embedding_model=embedding_model)
+Butler = Agent.AIAgent(name="Butler", Client=client, model=model, embedding_model=embedding_model)
+Maid = Agent.AIAgent(name="Maid", Client=client, model=model, embedding_model=embedding_model)
+Lord = Agent.AIAgent(name="Lord", Client=client, model=model, embedding_model=embedding_model)
+Knight = Agent.AIAgent(name="Knight", Client=client, model=model, embedding_model=embedding_model)
 
 
-Storyteller = Agent.AIAgent(name="Storyteller", api_key=api_key, model=model, embedding_model=embedding_model)
-Butler = Agent.AIAgent(name="Butler", api_key=api_key, model=model, embedding_model=embedding_model)
-Maid = Agent.AIAgent(name="Maid", api_key=api_key, model=model, embedding_model=embedding_model)
-Lord = Agent.AIAgent(name="Lord", api_key=api_key, model=model, embedding_model=embedding_model)
-Knight = Agent.AIAgent(name="Knight", api_key=api_key, model=model, embedding_model=embedding_model)
-
-
+@app.get("/getResponse")
+def get_response(character: str ,prompt: str):
+    if character == "Storyteller":
+        response = Storyteller.get_response(prompt)
+    elif character == "Butler":
+        response = Butler.get_response(prompt)
+    elif character == "Maid":
+        response = Maid.get_response(prompt)
+    elif character == "Lord":
+        response = Lord.get_response(prompt)
+    elif character == "Knight":
+        response = Knight.get_response(prompt)
+    else:
+        return {"error": "Character not found"}
+    return response
+    
+@app.get("/getAddToMemory")
+def get_add_to_memory(character: str, prompt: str):
+    if character == "Storyteller":
+        response = Storyteller.append_history(prompt)
+    elif character == "Butler":
+        response = Butler.append_history(prompt)
+    elif character == "Maid":
+        response = Maid.append_history(prompt)
+    elif character == "Lord":
+        response = Lord.append_history(prompt)
+    elif character == "Knight":
+        response = Knight.append_history(prompt)    
+    else:
+        return {"error": "Character not found"}
+    return response
 
 @app.get("/Storyteller")
 def get_story_teller_response(prompt: str):

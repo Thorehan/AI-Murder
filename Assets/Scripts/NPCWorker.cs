@@ -58,7 +58,7 @@ public class NPCWorker : MonoBehaviour
             return;
         }
         AddTaskRoomsFromList(taskPoints);
-        StartCoroutine(SendSignalToLocalhost("Game Started, pick where will you go"));
+        StartCoroutine(SendSignalToLocalhost(npcName,"Game Started, pick where will you go"));
     }
 
     void Update()
@@ -102,7 +102,7 @@ public class NPCWorker : MonoBehaviour
         isDoingTask = true;
         yield return new WaitForSeconds(taskDuration);
         //PickNewTarget();
-        StartCoroutine(SendSignalToLocalhost("you have waited for " + taskDuration));
+        StartCoroutine(SendSignalToLocalhost(npcName,"you have waited for " + taskDuration));
     }
 
 
@@ -110,10 +110,10 @@ public class NPCWorker : MonoBehaviour
     public void OnSignal(string signal)
     {
         // Send API call to localhost with the signal
-        StartCoroutine(SendSignalToLocalhost(signal));
+        StartCoroutine(SendSignalToLocalhost(npcName,signal));
     }
 
-    IEnumerator SendSignalToLocalhost(string signal)
+    IEnumerator SendSignalToLocalhost(string npcname,string signal)
     {
         Debug.Log($"Sending signal: {signal}");
         string temp = npcName.Replace(" ", "");
@@ -196,7 +196,14 @@ public class NPCWorker : MonoBehaviour
         }
     }
 
-
+    public IEnumerator AppendToNpc(string npc,string signal)
+    {
+        
+        Debug.Log($"Sending signal: {signal} to NPC: {npc}");
+        string temp = npc.Replace(" ", "");
+        string url = $"http://localhost:8000/{temp}?prompt={UnityWebRequest.EscapeURL(signal)}&character={UnityWebRequest.EscapeURL(temp)}";
+        yield return null;
+    }
     public IEnumerator Speak(string message)
     {
         yield return new WaitForSeconds(2f); // Simulate speaking delay
