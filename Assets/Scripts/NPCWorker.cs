@@ -190,6 +190,15 @@ public class NPCWorker : MonoBehaviour
                     agent.SetDestination(currentTarget.position);
                     isDoingTask = false;
                 }
+                else if (action.Contains("<Speak>"))
+                {
+                    string message = action.Replace("<Speak>", "").Replace("</Speak>", "");
+                    if (currentRoom != null)
+                    {
+                        StartCoroutine(Speak(message));
+                    }
+                }
+                
                 fk_it:;
                 
             }
@@ -209,10 +218,18 @@ public class NPCWorker : MonoBehaviour
         yield return new WaitForSeconds(2f); // Simulate speaking delay
         if ((bool)SpeakCD)
         {
-
+            Debug.Log($"{npcName} says: {message}");
+            currentRoom?.BroadcastMessageToWorkersCD($"{npcName}: {message}");
         }
     }
 
+    public void GetSpeak(string message)
+    {
+        SpeakCD.putCD();
+        string url = $"http://localhost:8000/getAddToMemory?character={npcName}&prompt={message}";
+        UnityWebRequest.Get(url);
+        StartCoroutine(Speak(message));
+    }
     void OnDestroy()
     {
         allNPCs.Remove(this);

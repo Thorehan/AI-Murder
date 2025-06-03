@@ -14,7 +14,7 @@ import uvicorn
 
 app = FastAPI()
 api_key = os.environ["OPENAI_API_KEY_SHARE"]
-model = "gpt-4o-mini"
+model = "gpt-4.1-nano"
 embedding_model = "text-embedding-3-small"
 client = OpenAI(api_key=api_key)
 

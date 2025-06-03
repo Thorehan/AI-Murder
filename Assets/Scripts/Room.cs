@@ -49,12 +49,12 @@ public class Room : MonoBehaviour
             worker.OnSignal(message);
         }
     }
-        public void BroadcastMessageToWorkersCD(string message)
+    public void BroadcastMessageToWorkersCD(string message)
     {
         Debug.Log($"Broadcasting message to workers in {roomName}: {message}");
         foreach (var worker in workersInRoom)
         {
-            worker.OnSignal(message);
+            worker.GetSpeak(message);
         }
     }
 }
