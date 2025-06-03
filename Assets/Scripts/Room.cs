@@ -11,7 +11,7 @@ public class Room : MonoBehaviour
         if (!workersInRoom.Contains(worker))
         {
             workersInRoom.Add(worker);
-            Debug.Log($"{worker.npcName} added to {roomName}");
+            //Debug.Log($"{worker.npcName} added to {roomName}");
         }
     }
     public void RemoveWorker(NPCWorker worker)
@@ -19,7 +19,7 @@ public class Room : MonoBehaviour
         if (workersInRoom.Contains(worker))
         {
             workersInRoom.Remove(worker);
-            Debug.Log($"{worker.npcName} removed from {roomName}");
+            //Debug.Log($"{worker.npcName} removed from {roomName}");
         }
     }
     void OnTriggerEnter(Collider collision)
@@ -49,12 +49,12 @@ public class Room : MonoBehaviour
             worker.OnSignal(message);
         }
     }
-        public void BroadcastMessageToWorkersCD(string message)
+    public void BroadcastMessageToWorkersCD(string message)
     {
         Debug.Log($"Broadcasting message to workers in {roomName}: {message}");
         foreach (var worker in workersInRoom)
         {
-            worker.OnSignal(message);
+            worker.GetSpeak(message);
         }
     }
 }

@@ -115,7 +115,7 @@ public class NPCWorker : MonoBehaviour
 
     IEnumerator SendSignalToLocalhost(string npcname,string signal)
     {
-        Debug.Log($"Sending signal: {signal}");
+        //Debug.Log($"Sending signal: {signal}");
         string temp = npcName.Replace(" ", "");
         string url = $"http://localhost:8000/{temp}?prompt={UnityWebRequest.EscapeURL(signal)}";
         using (UnityWebRequest www = UnityWebRequest.Get(url))
@@ -128,10 +128,10 @@ public class NPCWorker : MonoBehaviour
             }
             else
             {
-                Debug.Log($"{www.downloadHandler.text}");
+                //Debug.Log($"{www.downloadHandler.text}");
                 // Fallback: simple string extraction for 'action' if JObject fails
                 string json = www.downloadHandler.text.ToString();
-                Debug.Log($"Received JSON: {json}");
+                //Debug.Log($"Received JSON: {json}");
                 string action = null;
                 string cleaned = json.Trim('"');
                 string unescapedJson = System.Text.RegularExpressions.Regex.Unescape(cleaned);
@@ -141,7 +141,7 @@ public class NPCWorker : MonoBehaviour
                 {
                     action = jobj["action"].Value<string>();
                     if (!string.IsNullOrEmpty(action))
-                        Debug.Log($"Extracted action: {action}");
+                        Debug.Log($"The {npcName} did {action}\n thinking: {jobj["thinking"]}\n message: {jobj["message"]}");
                 }
 
                 //if (jobj["message"]?.Value<string>() != null)
@@ -190,6 +190,15 @@ public class NPCWorker : MonoBehaviour
                     agent.SetDestination(currentTarget.position);
                     isDoingTask = false;
                 }
+                else if (action.Contains("<Speak>"))
+                {
+                    string message = action.Replace("<Speak>", "").Replace("</Speak>", "");
+                    if (currentRoom != null)
+                    {
+                        StartCoroutine(Speak(message));
+                    }
+                }
+                
                 fk_it:;
                 
             }
@@ -209,10 +218,18 @@ public class NPCWorker : MonoBehaviour
         yield return new WaitForSeconds(2f); // Simulate speaking delay
         if ((bool)SpeakCD)
         {
-
+            Debug.Log($"{npcName} says: {message}");
+            currentRoom?.BroadcastMessageToWorkersCD($"{npcName}: {message}");
         }
     }
 
+    public void GetSpeak(string message)
+    {
+        SpeakCD.putCD();
+        string url = $"http://localhost:8000/getAddToMemory?character={npcName}&prompt={message}";
+        UnityWebRequest.Get(url);
+        StartCoroutine(Speak(message));
+    }
     void OnDestroy()
     {
         allNPCs.Remove(this);
