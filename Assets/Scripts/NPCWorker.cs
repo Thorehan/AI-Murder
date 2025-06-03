@@ -115,7 +115,7 @@ public class NPCWorker : MonoBehaviour
 
     IEnumerator SendSignalToLocalhost(string npcname,string signal)
     {
-        Debug.Log($"Sending signal: {signal}");
+        //Debug.Log($"Sending signal: {signal}");
         string temp = npcName.Replace(" ", "");
         string url = $"http://localhost:8000/{temp}?prompt={UnityWebRequest.EscapeURL(signal)}";
         using (UnityWebRequest www = UnityWebRequest.Get(url))
@@ -128,10 +128,10 @@ public class NPCWorker : MonoBehaviour
             }
             else
             {
-                Debug.Log($"{www.downloadHandler.text}");
+                //Debug.Log($"{www.downloadHandler.text}");
                 // Fallback: simple string extraction for 'action' if JObject fails
                 string json = www.downloadHandler.text.ToString();
-                Debug.Log($"Received JSON: {json}");
+                //Debug.Log($"Received JSON: {json}");
                 string action = null;
                 string cleaned = json.Trim('"');
                 string unescapedJson = System.Text.RegularExpressions.Regex.Unescape(cleaned);
@@ -141,7 +141,7 @@ public class NPCWorker : MonoBehaviour
                 {
                     action = jobj["action"].Value<string>();
                     if (!string.IsNullOrEmpty(action))
-                        Debug.Log($"Extracted action: {action}");
+                        Debug.Log($"The {npcName} did {action}\n thinking: {jobj["thinking"]}\n message: {jobj["message"]}");
                 }
 
                 //if (jobj["message"]?.Value<string>() != null)
