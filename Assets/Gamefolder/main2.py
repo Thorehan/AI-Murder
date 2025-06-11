@@ -46,17 +46,17 @@ def get_response(character: str ,prompt: str):
     return response
     
 @app.get("/getAddToMemory")
-def get_add_to_memory(character: str, prompt: str):
+def get_add_to_memory(character: str, prompt: str, role: str = "user"):
     if character == "Storyteller":
-        response = Storyteller.append_history(prompt)
+        response = Storyteller.append_history(prompt, role=role)
     elif character == "Butler":
-        response = Butler.append_history(prompt)
+        response = Butler.append_history(prompt, role=role)
     elif character == "Maid":
-        response = Maid.append_history(prompt)
+        response = Maid.append_history(prompt, role=role)
     elif character == "Lord":
-        response = Lord.append_history(prompt)
+        response = Lord.append_history(prompt, role=role)
     elif character == "Knight":
-        response = Knight.append_history(prompt)    
+        response = Knight.append_history(prompt, role=role)    
     else:
         return {"error": "Character not found"}
     return response
@@ -81,7 +81,9 @@ def get_lord_response(prompt: str):
 def get_knight_response(prompt: str):
     response = Knight.get_response(prompt)
     return response
-
+@app.get("/getLocation")
+def get_location(character: str):
+    return {"location": character}
 
 if __name__ == "__main__":
     uvicorn.run("main2:app", host="0.0.0.0", port=8000, reload=True)

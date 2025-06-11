@@ -29,7 +29,7 @@ public class Room : MonoBehaviour
             BroadcastMessageToWorkers($"{npc.npcName} has entered the {roomName}");
             AddWorker(npc);
             npc.currentRoom = this;
-            Debug.Log($"{collision.transform.name} has entered the {roomName}");
+            //Debug.Log($"{collision.transform.name} has entered the {roomName}");
         }
     }
     void OnTriggerExit(Collider collision)
@@ -37,13 +37,13 @@ public class Room : MonoBehaviour
         if (collision.transform.TryGetComponent<NPCWorker>(out NPCWorker npc))
         {
             RemoveWorker(npc);
-            Debug.Log($"{collision.transform.name} has exited the {roomName}");
+            //Debug.Log($"{collision.transform.name} has exited the {roomName}");
         }
     }
 
     public void BroadcastMessageToWorkers(string message)
     {
-        Debug.Log($"Broadcasting message to workers in {roomName}: {message}");
+        //Debug.Log($"Broadcasting message to workers in {roomName}: {message}");
         foreach (var worker in workersInRoom)
         {
             worker.OnSignal(message);
@@ -51,7 +51,7 @@ public class Room : MonoBehaviour
     }
     public void BroadcastMessageToWorkersCD(string message)
     {
-        Debug.Log($"Broadcasting message to workers in {roomName}: {message}");
+        //Debug.Log($"Broadcasting message to workers in {roomName}: {message}");
         foreach (var worker in workersInRoom)
         {
             worker.GetSpeak(message);

@@ -83,7 +83,7 @@ public class NPCWorker : MonoBehaviour
 
         if (!isDoingTask && !agent.pathPending && agent.remainingDistance <= agent.stoppingDistance)
         {
-            Debug.Log($"{npcName} gets task");
+            //Debug.Log($"{npcName} gets task");
             StartCoroutine(DoTask());
         }
     }

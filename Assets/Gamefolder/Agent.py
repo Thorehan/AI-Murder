@@ -24,6 +24,9 @@ class AIAgent:
         self.sysprompt_path = pathlib.Path(f"sysprompt.txt") if not pathlib.Path(f"{self.name}_sysprompt.txt").exists() else pathlib.Path(f"{self.name}_sysprompt.txt")
         with open(self.sysprompt_path, 'r', encoding='utf-8') as f:
             data = f.read()
+            with open(pathlib.Path(f"sysprompt.txt"),  'r', encoding='utf-8') as f2:
+                data2 = f2.read()
+                data = data2 + data
         self.system_prompt = {"role": "system", "content": data}
         self.chat_history = [self.system_prompt]
         self.test_text = self.load_data_csv()
