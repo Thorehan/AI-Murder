@@ -27,7 +27,6 @@ public class Room : MonoBehaviour
         if (collision.transform.TryGetComponent<NPCWorker>(out NPCWorker npc))
         {
             BroadcastMessageToWorkers($"{npc.npcName} has entered the {roomName}");
-            Storyteller.Instance?.OnWorkerEnteredRoom(this, npc);
             AddWorker(npc);
             npc.currentRoom = this;
             //Debug.Log($"{collision.transform.name} has entered the {roomName}");
