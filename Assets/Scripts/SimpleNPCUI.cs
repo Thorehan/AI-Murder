@@ -9,8 +9,10 @@ public class SimpleNPCUI : MonoBehaviour
 {
     [Header("UI Components")]
     public TMP_InputField npcNameInput;
+    public TMP_InputField promptInput;
     public Button spawnButton;
     public Button deleteButton;
+    public Button sendPromptButton;
     public TextMeshProUGUI feedbackText;
 
     [Header("Spawn Settings")]
@@ -22,11 +24,13 @@ public class SimpleNPCUI : MonoBehaviour
     public float defaultTaskDuration = 3f;
 
     private List<GameObject> spawnedNPCs = new List<GameObject>();
+    private int npcCounter = 0;
 
     void Start()
     {
         spawnButton.onClick.AddListener(SpawnNewNPC);
         deleteButton.onClick.AddListener(DeleteNPC);
+        sendPromptButton.onClick.AddListener(SendPromptToNPC);
         ShowMessage("Enter NPC name and click Spawn", Color.white);
 
         FindAllTaskPoints();
@@ -48,8 +52,7 @@ public class SimpleNPCUI : MonoBehaviour
 
         if (string.IsNullOrEmpty(npcName))
         {
-            ShowMessage("Please enter a name!", Color.red);
-            return;
+            npcName = GetUniqueNPCName(); // Otomatik isim ver
         }
 
         if (NPCExists(npcName))
@@ -78,6 +81,31 @@ public class SimpleNPCUI : MonoBehaviour
         }
 
         StartCoroutine(DeleteNPCProcess(npcName));
+    }
+
+    void SendPromptToNPC()
+    {
+        string npcName = npcNameInput.text.Trim();
+        string prompt = promptInput.text.Trim();
+
+        if (string.IsNullOrEmpty(npcName) || string.IsNullOrEmpty(prompt))
+        {
+            ShowMessage("Enter both NPC name and prompt!", Color.red);
+            return;
+        }
+
+        NPCWorker[] allNPCs = FindObjectsOfType<NPCWorker>();
+        foreach (NPCWorker npc in allNPCs)
+        {
+            if (npc.npcName == npcName)
+            {
+                npc.OnSignal(prompt);
+                ShowMessage($"Sent prompt to '{npcName}': {prompt}", Color.cyan);
+                return;
+            }
+        }
+
+        ShowMessage($"NPC '{npcName}' not found!", Color.red);
     }
 
     IEnumerator CreateNPCProcess(string npcName)
@@ -189,6 +217,18 @@ public class SimpleNPCUI : MonoBehaviour
                 return true;
         }
         return false;
+    }
+
+    string GetUniqueNPCName()
+    {
+        string baseName = "SpawnedNPC";
+        string candidateName;
+        do
+        {
+            candidateName = $"{baseName}{npcCounter}";
+            npcCounter++;
+        } while (NPCExists(candidateName));
+        return candidateName;
     }
 
     void ShowMessage(string message, Color color)
