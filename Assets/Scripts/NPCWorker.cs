@@ -215,13 +215,17 @@ public class NPCWorker : MonoBehaviour
     }
     public IEnumerator Speak(string message)
     {
-        yield return new WaitForSeconds(2f); // Simulate speaking delay
+        yield return new WaitForSeconds(2f);
+
         if ((bool)SpeakCD)
         {
             Debug.Log($"{npcName} says: {message}");
-            currentRoom?.BroadcastMessageToWorkersCD($"{npcName}: {message}");
+
+            // Yeni imzayı kullanıyoruz → 'this' konuşanın referansı
+            currentRoom?.BroadcastMessageToWorkersCD($"{npcName}: {message}", this);
         }
     }
+
 
     public void GetSpeak(string message)
     {
