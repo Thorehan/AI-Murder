@@ -15,18 +15,23 @@ class ThoughtResponse(BaseModel):
     action: str = Field(default=None, description="Action to be taken by the agent, if any. this will interact with code. you will write where you go here")
 
 class AIAgent:
-    def __init__(self, name: str, Client: object, model: str, embedding_model: str):
+    def __init__(self, name: str, Client: object, model: str, embedding_model: str, system_prompt: str = ""):
         self.name = name
         self.model = model
         self.embedding_model = embedding_model
         self.client = Client
         self.csv_path = pathlib.Path(f"{self.name}.csv")
-        self.sysprompt_path = pathlib.Path(f"sysprompt.txt") if not pathlib.Path(f"{self.name}_sysprompt.txt").exists() else pathlib.Path(f"{self.name}_sysprompt.txt")
-        with open(self.sysprompt_path, 'r', encoding='utf-8') as f:
-            data = f.read()
-            with open(pathlib.Path(f"sysprompt.txt"),  'r', encoding='utf-8') as f2:
-                data2 = f2.read()
-                data = data2 + data
+        data = ""
+        if system_prompt != "":
+            data = system_prompt
+        else:
+            self.sysprompt_path = pathlib.Path(f"sysprompt.txt") if not pathlib.Path(f"{self.name}_sysprompt.txt").exists() else pathlib.Path(f"{self.name}_sysprompt.txt")
+            with open(self.sysprompt_path, 'r', encoding='utf-8') as f:
+                data = f.read()
+
+        with open(pathlib.Path(f"sysprompt.txt"),  'r', encoding='utf-8') as f2:
+            data2 = f2.read()
+            data = data2 + data
         self.system_prompt = {"role": "system", "content": data}
         self.chat_history = [self.system_prompt]
         self.test_text = self.load_data_csv()
@@ -169,8 +174,7 @@ class AIAgent:
             model=self.model,
             messages=[{"role": "system", "content": sysmessage}, {"role": "user", "content": input}],
             max_completion_tokens=2048,
-            frequency_penalty=0,
-            temperature=0.6,
+            temperature=0.8,
             tools=self.tools,
             tool_choice="auto",
             response_format={"type": "json_object"}
@@ -241,6 +245,92 @@ class AIAgent:
         self.append_history(prompt, role="user")
         response = self.GenerateText()
         return response
-
-
-
+    
+    
+    buffer = ""
+    
+    def OneShotGetReply(self, input):
+        memory = [{"role": "system", "content": self.system_prompt["content"]}, {"role": "user", "content": self.buffer + input}]
+        self.buffer = ""
+        memory = [{"role": "system", "content": self.system_prompt["content"]}, {"role": "user", "content": self.MemoryCompress(context=memory)}]
+        memory.append({"role": "user", "content": self.SearchMemoryDatabase(memory)})
+        response = self.client.beta.chat.completions.parse(
+            model=self.model,
+            messages= memory,
+            max_completion_tokens=2048,
+            temperature=0.8,
+            response_format=ThoughtResponse
+        )
+        data = json.loads(response.choices[0].message.content)
+        return ThoughtResponse(**data)
+    
+    def OneShotAddMemory(self, input):
+        self.buffer += "\n"
+        self.buffer += input
+        return
+    
+    def MemoryCompress(self, context):
+        context = context.copy()
+        custom_system_prompt = {"role": "system", "content": """You are a Context Sub-module, you will take the input and add it to previous context.
+                                a context message looks like this:
+                                '''
+                                Summary: while you were doing x, you heard y happened. after that you did z...(this summary can be as long as you need, it have to contains everything that happened, but as you add more and more info, it's ok to forget some of them)
+                                LastMessage: enter last input here, untouched.
+                                '''
+                                """}
+        context = [custom_system_prompt if msg['role'] == 'system' else msg for msg in context]
+        response = self.client.chat.completions.create(
+            model=self.model,
+            messages=context,
+            max_completion_tokens=2048,
+            temperature=0.4,
+        )
+        return response.choices[0].message.content
+        
+    
+    def SearchMemoryDatabase(self, context):
+        # Replace the system prompt in the context with a string of your choice
+        
+        context = context.copy()
+        custom_system_prompt = {"role": "system", "content": "You are a memory Sub-module, you will search the database throughly, and return important information. when adding info, you must add relevant text too, an example is \"while doing x, you hear y happened\" and so on. you can make multiple tool calls to ensure you get all the information needed. in the end, you will return with \"<memory> you can remember y happened when you were doing x\" or similiar response."}
+        context = [custom_system_prompt if msg['role'] == 'system' else msg for msg in context]
+        
+        response = self.client.chat.completions.create(
+            model=self.model,
+            messages= context,
+            max_completion_tokens=2048,
+            frequency_penalty=0,
+            temperature=0.4,
+            tools=self.tools,
+            tool_choice="auto"
+        )
+        response_message = response.choices[0].message
+        toolcall = response_message.tool_calls
+        if toolcall:
+            context.append(response_message)
+            function_list = {
+                "SearchRecord": self.SearchRecordFunction,
+                "ChangeRecord": self.ChangeRecordFunction,
+                "DeleteRecord": self.DeleteRecordFunction,
+                "AddRecord": self.AddRecordFunction,
+            }
+            
+            tool_responses = []
+            for call in toolcall:
+                calling = function_list[call.function.name]
+                print(f"Calling function: {call.function.name}")
+                args = call.function.arguments
+                func_response = calling(args)
+                if not isinstance(func_response, str):
+                    func_response = json.dumps(func_response, ensure_ascii=False)
+                tool_responses.append(
+                    {
+                        "role": "tool",
+                        "tool_call_id": call.id,
+                        "content": func_response
+                    }
+                )
+            context.extend(tool_responses)
+            return self.GenerateText()
+        
+        return response.choices[0].message.content

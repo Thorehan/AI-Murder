@@ -28,58 +28,55 @@ Maid = Agent.AIAgent(name="Maid", Client=client, model=model, embedding_model=em
 Lord = Agent.AIAgent(name="Lord", Client=client, model=model, embedding_model=embedding_model)
 Knight = Agent.AIAgent(name="Knight", Client=client, model=model, embedding_model=embedding_model)
 
+agents = {
+    "Storyteller": Storyteller,
+    "Butler": Butler,
+    "Maid": Maid,
+    "Lord": Lord,
+    "Knight": Knight
+}
+
+@app.get("/addAgent") # name and system_prompt
+def add_agent(name: str, model: str = "gpt-4.1-nano", embedding_model: str = "text-embedding-3-small", system_prompt: str = ""):
+    if name in agents:
+        return {"error": "Agent already exists"}
+    new_agent = Agent.AIAgent(name=name, Client=client, model=model, embedding_model=embedding_model)
+    agents[name] = new_agent
+    return True
 
 @app.get("/getResponse")
 def get_response(character: str ,prompt: str):
-    if character == "Storyteller":
-        response = Storyteller.get_response(prompt)
-    elif character == "Butler":
-        response = Butler.get_response(prompt)
-    elif character == "Maid":
-        response = Maid.get_response(prompt)
-    elif character == "Lord":
-        response = Lord.get_response(prompt)
-    elif character == "Knight":
-        response = Knight.get_response(prompt)
-    else:
+    if character not in agents:
         return {"error": "Character not found"}
+    response = agents[character].OneShotGetReply(prompt)
     return response
     
 @app.get("/getAddToMemory")
-def get_add_to_memory(character: str, prompt: str, role: str = "user"):
-    if character == "Storyteller":
-        response = Storyteller.append_history(prompt, role=role)
-    elif character == "Butler":
-        response = Butler.append_history(prompt, role=role)
-    elif character == "Maid":
-        response = Maid.append_history(prompt, role=role)
-    elif character == "Lord":
-        response = Lord.append_history(prompt, role=role)
-    elif character == "Knight":
-        response = Knight.append_history(prompt, role=role)    
-    else:
+def get_add_to_memory(character: str, prompt: str):
+    if character not in agents:
         return {"error": "Character not found"}
+    response = agents[character].OneShotAddMemory(input=prompt)
     return response
 
 @app.get("/Storyteller")
 def get_story_teller_response(prompt: str):
-    response = Storyteller.get_response(prompt)
+    response = Storyteller.OneShotGetReply(input=prompt)
     return response
 @app.get("/Butler")
 def get_butler_response(prompt: str):
-    response = Butler.get_response(prompt)
+    response = Butler.OneShotGetReply(input=prompt)
     return response
 @app.get("/Maid")
 def get_maid_response(prompt: str):
-    response = Maid.get_response(prompt)
+    response = Maid.OneShotGetReply(input=prompt)
     return response
 @app.get("/Lord")
 def get_lord_response(prompt: str):
-    response = Lord.get_response(prompt)
+    response = Lord.OneShotGetReply(input=prompt)
     return response
 @app.get("/Knight")
 def get_knight_response(prompt: str):
-    response = Knight.get_response(prompt)
+    response = Knight.OneShotGetReply(input=prompt)
     return response
 @app.get("/getLocation")
 def get_location(character: str):
