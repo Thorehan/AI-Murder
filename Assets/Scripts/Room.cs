@@ -43,6 +43,7 @@ public class Room : MonoBehaviour
 
     public void BroadcastMessageToWorkers(string message)
     {
+        workersInRoom.RemoveAll(worker => worker == null);
         //Debug.Log($"Broadcasting message to workers in {roomName}: {message}");
         foreach (var worker in workersInRoom)
         {
