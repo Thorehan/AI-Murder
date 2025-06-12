@@ -1,15 +1,20 @@
 using System.Collections;
-using Newtonsoft.Json.Linq;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Networking;
+using Newtonsoft.Json.Linq;
+
 
 public class Storyteller : MonoBehaviour
 {
     public static Storyteller Instance { get; private set; }
 
-    [Tooltip("Storyteller ile karakter sorusu arasındaki bekleme süresi")]
-    public float askDelay = 1.0f;
+    public float askInterval = 5f;
 
+    private int currentIndex = 0;
+    private Coroutine askLoop;
+
+    #region Singleton
     void Awake()
     {
         if (Instance != null && Instance != this)
@@ -20,50 +25,42 @@ public class Storyteller : MonoBehaviour
         Instance = this;
         DontDestroyOnLoad(gameObject);
     }
+    #endregion
 
-
-    public void OnWorkerEnteredRoom(Room room, NPCWorker worker)
+    void Start()
     {
-        StartCoroutine(HandleWorkerEntry(room, worker));
+        askLoop = StartCoroutine(AskWorkersLoop());
     }
 
-
-    IEnumerator HandleWorkerEntry(Room room, NPCWorker worker)
+    IEnumerator AskWorkersLoop()
     {
-        yield return SendToAPIAndMaybeSpeak(
-            character: "Storyteller",
-            prompt: $"{worker.npcName} has entered the {room.roomName}."
-        );
-
-        yield return new WaitForSeconds(askDelay);
-
-        string question = $"{worker.npcName}, ne yapıyorsun?";
-        room.BroadcastMessageToWorkers(question);
-        worker.OnSignal("What are you doing?");
-    }
-
-
-    IEnumerator SendToAPIAndMaybeSpeak(string character, string prompt)
-    {
-        string url = $"http://localhost:8000/{character}?prompt={UnityWebRequest.EscapeURL(prompt)}";
-
-        using (UnityWebRequest www = UnityWebRequest.Get(url))
+        while (true)
         {
-            yield return www.SendWebRequest();
-            if (www.result != UnityWebRequest.Result.Success)
-                yield break;
-
-            string cleaned = System.Text.RegularExpressions.Regex.Unescape(www.downloadHandler.text.Trim('"'));
-            JObject jobj = JObject.Parse(cleaned);
-
-            string action = jobj["action"]?.Value<string>();
-            if (!string.IsNullOrEmpty(action) && action.Contains("<Speak>"))
+            IReadOnlyList<NPCWorker> workers = NPCWorker.All;
+            if (workers.Count > 0)
             {
-                string spoken = action.Replace("<Speak>", "").Replace("</Speak>", "");
-                Debug.Log($"Storyteller says: {spoken}");
-                foreach (Room room in FindObjectsOfType<Room>())
-                    room.BroadcastMessageToWorkers(spoken);
+                if (currentIndex >= workers.Count) currentIndex = 0;
+
+                NPCWorker npc = workers[currentIndex];
+                currentIndex++;
+
+                if (npc != null)
+                    yield return AskWorkerWhatDoing(npc);
             }
+
+            yield return new WaitForSeconds(askInterval);
         }
+    }
+
+    IEnumerator AskWorkerWhatDoing(NPCWorker npc)
+    {
+        string questionTr = $"{npc.npcName}, ne yapıyorsun?";
+        string questionEn = "What are you doing?";
+
+        npc.currentRoom?.BroadcastMessageToWorkers(questionTr);
+
+        npc.OnSignal(questionEn);
+
+        yield return null;
     }
 }
