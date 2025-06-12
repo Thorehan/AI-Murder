@@ -204,26 +204,34 @@ public class NPCWorker : MonoBehaviour
             }
         }
     }
-
+    IEnumerator AddMessageToMemory(string npcname, string signal)
+    {
+        string temp = npcName.Replace(" ", "");
+        string url = $"http://localhost:8000/getAddToMemory?character={temp}&prompt={UnityWebRequest.EscapeURL(signal)}";
+        using (UnityWebRequest www = UnityWebRequest.Get(url))
+        {
+            yield return null;
+        }
+    }
+    public void AddMemory(string npcName, string signal)
+    {
+        StartCoroutine(AddMessageToMemory(npcName, signal));
+    }
     public IEnumerator AppendToNpc(string npc, string signal)
     {
 
         Debug.Log($"Sending signal: {signal} to NPC: {npc}");
         string temp = npc.Replace(" ", "");
         string url = $"http://localhost:8000/{temp}?prompt={UnityWebRequest.EscapeURL(signal)}&character={UnityWebRequest.EscapeURL(temp)}";
-        yield return null;
+        yield return 1;
     }
     public IEnumerator Speak(string message)
     {
-        yield return new WaitForSeconds(2f);
+        Debug.Log($"{npcName} says: {message}");
 
-        if ((bool)SpeakCD)
-        {
-            Debug.Log($"{npcName} says: {message}");
-
-            // Yeni imzayı kullanıyoruz → 'this' konuşanın referansı
-            currentRoom?.BroadcastMessageToWorkersCD($"{npcName}: {message}", this);
-        }
+        // Yeni imzayı kullanıyoruz → 'this' konuşanın referansı
+        currentRoom?.BroadcastMessageToWorkersCD($"{npcName}: {message}", this);
+        yield return 1;
     }
 
 

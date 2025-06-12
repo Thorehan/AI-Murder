@@ -8,6 +8,5 @@ WARNING:
 you can only write one action inside "<>" it will cause you to go towards destination or speak your message.
 other characters can read your message ONLY IF YOU USE <Speak>.
 your messages will only be seen by system
-you should still use your tools to flush memory and take notes of important things
-
+you should use the location actions only if you want to move towards one of the rooms, otherwise you can speak of leave it empty
 

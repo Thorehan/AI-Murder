@@ -26,9 +26,11 @@ public class Room : MonoBehaviour
     {
         if (collision.transform.TryGetComponent<NPCWorker>(out NPCWorker npc))
         {
-            BroadcastMessageToWorkers($"{npc.npcName} has entered the {roomName}");
+            BroadcastMessageToWorkersCD($"{npc.npcName} has entered the {roomName}", npc);
             AddWorker(npc);
             npc.currentRoom = this;
+            string workersList = string.Join(", ", workersInRoom.ConvertAll(w => w.npcName));
+            npc.AddMemory(npc.npcName, $"you entered the {roomName}, you see {workersList}");
             //Debug.Log($"{collision.transform.name} has entered the {roomName}");
         }
     }
@@ -55,7 +57,10 @@ public class Room : MonoBehaviour
         foreach (var worker in workersInRoom)
         {
             if (worker != sender)
-                worker.GetSpeak(message);
+            {
+                //    worker.GetSpeak(message);
+                worker.AddMemory(worker.npcName,message);
+            }
         }
     }
 

@@ -54,12 +54,13 @@ public class Storyteller : MonoBehaviour
 
     IEnumerator AskWorkerWhatDoing(NPCWorker npc)
     {
-        string questionEn = "What are you doing?";
+        var temp = npc.currentRoom.name != null ? npc.currentRoom.name : "start";
+        string questionEn = $"you are in {temp}, what are you going to do?";
 
         
 
         npc.OnSignal(questionEn);
 
-        yield return null;
+        yield return 1;
     }
 }

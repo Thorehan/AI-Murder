@@ -248,11 +248,12 @@ class AIAgent:
     
     
     buffer = ""
-    
+    memoryCompress = "";
     def OneShotGetReply(self, input):
         memory = [{"role": "system", "content": self.system_prompt["content"]}, {"role": "user", "content": self.buffer + input}]
         self.buffer = ""
-        memory = [{"role": "system", "content": self.system_prompt["content"]}, {"role": "user", "content": self.MemoryCompress(context=memory)}]
+        self.memoryCompress = self.MemoryCompress(context=memory);
+        memory = [{"role": "system", "content": self.system_prompt["content"]}, {"role": "user", "content": self.memoryCompress}]
         memory.append({"role": "user", "content": self.SearchMemoryDatabase(memory)})
         response = self.client.beta.chat.completions.parse(
             model=self.model,
@@ -279,6 +280,7 @@ class AIAgent:
                                 '''
                                 """}
         context = [custom_system_prompt if msg['role'] == 'system' else msg for msg in context]
+        context.append({"role": "user", "content": self.memoryCompress});
         response = self.client.chat.completions.create(
             model=self.model,
             messages=context,
