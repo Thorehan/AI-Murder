@@ -16,7 +16,7 @@ public class NPCWorker : MonoBehaviour
     public float taskDuration = 3f;
     public float minDistanceToOther = 2f;
 
-    private static List<NPCWorker> allNPCs = new List<NPCWorker>();
+    private static readonly List<NPCWorker> allNPCs = new List<NPCWorker>();
 
     private List<Transform> taskPoints = new List<Transform>();
     private Transform currentTarget;
