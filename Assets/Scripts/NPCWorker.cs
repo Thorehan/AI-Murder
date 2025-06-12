@@ -58,14 +58,14 @@ public class NPCWorker : MonoBehaviour
             return;
         }
         AddTaskRoomsFromList(taskPoints);
-        StartCoroutine(SendSignalToLocalhost(npcName,"Game Started, pick where will you go"));
+        StartCoroutine(SendSignalToLocalhost(npcName, "Game Started, pick where will you go"));
     }
 
     void Update()
     {
         //if (isDoingTask || currentTarget == null)
         //    return;
-//
+        //
         //foreach (NPCWorker other in allNPCs)
         //{
         //    if (other == this) continue;
@@ -102,7 +102,7 @@ public class NPCWorker : MonoBehaviour
         isDoingTask = true;
         yield return new WaitForSeconds(taskDuration);
         //PickNewTarget();
-        StartCoroutine(SendSignalToLocalhost(npcName,"you have waited for " + taskDuration));
+        StartCoroutine(SendSignalToLocalhost(npcName, "you have waited for " + taskDuration));
     }
 
 
@@ -110,10 +110,10 @@ public class NPCWorker : MonoBehaviour
     public void OnSignal(string signal)
     {
         // Send API call to localhost with the signal
-        StartCoroutine(SendSignalToLocalhost(npcName,signal));
+        StartCoroutine(SendSignalToLocalhost(npcName, signal));
     }
 
-    IEnumerator SendSignalToLocalhost(string npcname,string signal)
+    IEnumerator SendSignalToLocalhost(string npcname, string signal)
     {
         //Debug.Log($"Sending signal: {signal}");
         string temp = npcName.Replace(" ", "");
@@ -149,12 +149,12 @@ public class NPCWorker : MonoBehaviour
                 //    if (currentRoom != null)
                 //        currentRoom.BroadcastMessageToWorkers($"{npcName}: {jobj["message"].Value<string>()}");
                 //}
-                
+
                 if (action == null)
-                    {
-                        Debug.Log("message null");
-                        goto fk_it;
-                    }
+                {
+                    Debug.Log("message null");
+                    goto fk_it;
+                }
                 if (action.Contains("<DinnerRoom>"))
                 {
                     Transform newTarget = TaskRooms["DinnerRoom"];
@@ -198,16 +198,16 @@ public class NPCWorker : MonoBehaviour
                         StartCoroutine(Speak(message));
                     }
                 }
-                
-                fk_it:;
-                
+
+            fk_it:;
+
             }
         }
     }
 
-    public IEnumerator AppendToNpc(string npc,string signal)
+    public IEnumerator AppendToNpc(string npc, string signal)
     {
-        
+
         Debug.Log($"Sending signal: {signal} to NPC: {npc}");
         string temp = npc.Replace(" ", "");
         string url = $"http://localhost:8000/{temp}?prompt={UnityWebRequest.EscapeURL(signal)}&character={UnityWebRequest.EscapeURL(temp)}";
@@ -234,4 +234,7 @@ public class NPCWorker : MonoBehaviour
     {
         allNPCs.Remove(this);
     }
+    
+    public static IReadOnlyList<NPCWorker> All => allNPCs;
+
 }
