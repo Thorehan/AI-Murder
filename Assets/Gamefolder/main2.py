@@ -40,7 +40,7 @@ agents = {
 def add_agent(name: str, model: str = "gpt-4.1-nano", embedding_model: str = "text-embedding-3-small", system_prompt: str = ""):
     if name in agents:
         return {"error": "Agent already exists"}
-    new_agent = Agent.AIAgent(name=name, Client=client, model=model, embedding_model=embedding_model)
+    new_agent = Agent.AIAgent(name=name, Client=client, model=model, embedding_model=embedding_model, system_prompt=system_prompt)
     agents[name] = new_agent
     return True
 

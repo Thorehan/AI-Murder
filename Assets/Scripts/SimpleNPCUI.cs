@@ -49,6 +49,7 @@ public class SimpleNPCUI : MonoBehaviour
     public void SpawnNewNPC()
     {
         string npcName = npcNameInput.text.Trim();
+        string prompt = promptInput.text.Trim();
 
         if (string.IsNullOrEmpty(npcName))
         {
@@ -61,7 +62,7 @@ public class SimpleNPCUI : MonoBehaviour
             return;
         }
 
-        StartCoroutine(CreateNPCProcess(npcName));
+        StartCoroutine(CreateNPCProcess(npcName, prompt));
     }
 
     public void DeleteNPC()
@@ -108,11 +109,11 @@ public class SimpleNPCUI : MonoBehaviour
         ShowMessage($"NPC '{npcName}' not found!", Color.red);
     }
 
-    IEnumerator CreateNPCProcess(string npcName)
+    IEnumerator CreateNPCProcess(string npcName, string prompt)
     {
         ShowMessage($"Creating '{npcName}'...", Color.blue);
 
-        yield return StartCoroutine(CallPythonAPI($"http://localhost:8000/addAgent?name={npcName}"));
+        yield return StartCoroutine(CallPythonAPI($"http://localhost:8000/addAgent?name={npcName}&system_prompt={prompt}"));
 
         GameObject newNPC = SpawnNPCGameObject(npcName);
 
