@@ -117,7 +117,7 @@ public class NPCWorker : MonoBehaviour
     {
         //Debug.Log($"Sending signal: {signal}");
         string temp = npcName.Replace(" ", "");
-        string url = $"http://localhost:8000/{temp}?prompt={UnityWebRequest.EscapeURL(signal)}";
+        string url = $"http://localhost:8000/getResponse?character={temp}&prompt={UnityWebRequest.EscapeURL(signal)}";
         using (UnityWebRequest www = UnityWebRequest.Get(url))
         {
             yield return www.SendWebRequest();

@@ -54,10 +54,9 @@ public class Storyteller : MonoBehaviour
 
     IEnumerator AskWorkerWhatDoing(NPCWorker npc)
     {
-        string questionTr = $"{npc.npcName}, ne yapıyorsun?";
         string questionEn = "What are you doing?";
 
-        npc.currentRoom?.BroadcastMessageToWorkers(questionTr);
+        
 
         npc.OnSignal(questionEn);
 
